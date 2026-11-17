@@ -1,0 +1,136 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://unpkg.com/@tonconnect/ui@2/dist/tonconnect-ui.min.js"></script>
+<style>
+:root{--g:rgba(255,255,255,.12);--b:rgba(255,255,255,.28)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#fff;overflow-x:hidden;
+ background:#0a0f2c;padding:env(safe-area-inset-top) 14px 90px}
+.bg{position:fixed;inset:0;z-index:-1;filter:blur(60px);opacity:.9}
+.bg i{position:absolute;border-radius:50%;animation:f 14s ease-in-out infinite alternate}
+.bg i:nth-child(1){width:60vw;height:60vw;background:#2aabee;top:-10%;left:-10%}
+.bg i:nth-child(2){width:55vw;height:55vw;background:#a855f7;bottom:5%;right:-15%;animation-delay:-5s}
+.bg i:nth-child(3){width:40vw;height:40vw;background:#ff7ab6;bottom:-10%;left:10%;animation-delay:-9s}
+@keyframes f{to{transform:translate(12vw,8vh) scale(1.2)}}
+.glass{background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.05));
+ backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);
+ border:1px solid var(--b);border-radius:26px;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.6),inset 0 -8px 20px rgba(255,255,255,.04),0 10px 40px rgba(0,0,0,.3)}
+.top{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+.pill{padding:8px 14px;border-radius:99px;font-size:14px;font-weight:600}
+.stage{position:relative;height:300px;margin:8px 0;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+#duck{width:190px;transition:transform .8s cubic-bezier(.3,1.4,.5,1);animation:bob 2.2s ease-in-out infinite;cursor:pointer}
+@keyframes bob{50%{translate:0 -8px}}
+.jump{animation:jump .6s!important}@keyframes jump{40%{translate:0 -60px}}
+.sleep #duck{filter:brightness(.7)}
+.bars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px;margin:10px 0}
+.bar{font-size:12px;opacity:.9}.bar div{height:8px;border-radius:9px;background:rgba(255,255,255,.15);margin-top:5px;overflow:hidden}
+.bar b{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#2aabee,#9be15d);transition:width .5s}
+.acts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+button{font:inherit;color:#fff;border:1px solid var(--b);cursor:pointer}
+.acts button,.buy{padding:14px 4px;border-radius:20px;background:var(--g);backdrop-filter:blur(20px);font-size:13px;
+ box-shadow:inset 0 1px 1px rgba(255,255,255,.5);transition:.15s}
+.acts button:active,.buy:active,.gift:active{transform:scale(.92)}
+.acts span{display:block;font-size:26px}
+h3{margin:22px 4px 10px;font-size:17px}
+.row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.gift{flex:0 0 84px;height:100px;border-radius:20px;padding:6px;text-align:center;font-size:10px;background:var(--g);overflow:hidden}
+.gift img{width:60px;height:60px;border-radius:12px;object-fit:cover}
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.buy{padding:14px;text-align:left}.buy small{opacity:.7;display:block}
+.tabbar{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;padding:6px;border-radius:30px;z-index:5}
+.tabbar button{flex:1;padding:12px;border:0;background:none;border-radius:24px;font-size:20px}
+.tabbar .on{background:rgba(255,255,255,.22);box-shadow:inset 0 1px 1px rgba(255,255,255,.6)}
+.page{display:none}.page.on{display:block}
+.toast{position:fixed;top:70px;left:50%;translate:-50% -20px;opacity:0;padding:10px 18px;border-radius:20px;transition:.3s;z-index:9}
+.toast.s{translate:-50% 0;opacity:1}
+.lb{padding:10px 16px;display:flex;justify-content:space-between;margin-bottom:8px;border-radius:18px}
+</style></head><body>
+<div class="bg"><i></i><i></i><i></i></div>
+<div class="toast glass" id="toast"></div>
+
+<div id="home" class="page on">
+ <div class="top"><div class="pill glass" id="lvl">🔥 0</div><div id="ton"></div></div>
+ <div class="glass stage" id="stage">
+  <svg id="duck" viewBox="0 0 200 200">
+   <defs><radialGradient id="y" cx="40%" cy="30%"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#ffb800"/></radialGradient></defs>
+   <ellipse cx="100" cy="188" rx="60" ry="8" fill="rgba(0,0,0,.25)"/>
+   <ellipse cx="100" cy="130" rx="62" ry="52" fill="url(#y)"/>
+   <path d="M40 125q-22-12-16-34q22 4 30 24z" fill="#ffc400"/>
+   <circle cx="100" cy="72" r="44" fill="url(#y)"/>
+   <path d="M120 82q36-4 42 6q-8 12-42 6z" fill="#ff8a00"/>
+   <g id="eyes"><circle id="eye" cx="92" cy="64" r="6" fill="#222"/><circle cx="94" cy="62" r="2" fill="#fff"/></g>
+   <ellipse cx="78" cy="82" rx="8" ry="5" fill="#ff9d8a" opacity=".6"/>
+   <g id="accs"></g>
+  </svg>
+ </div>
+ <div class="glass bars" id="bars"></div>
+ <div class="acts">
+  <button onclick="act('feed')"><span>🍞</span>Кормить</button>
+  <button onclick="act('play')"><span>🎾</span>Играть</button>
+  <button onclick="act('sleep')"><span>😴</span>Спать</button>
+  <button onclick="share()"><span>🎁</span>Позвать</button>
+ </div>
+ <h3>Подарки утки</h3>
+ <div class="row" id="gifts"><div class="gift glass">Подключи кошелёк</div></div>
+</div>
+
+<div id="shop" class="page"><h3>Магазин ⭐</h3><div class="shop" id="items"></div></div>
+<div id="top" class="page"><h3>Топ уток 🏆</h3><div id="lb"></div></div>
+
+<div class="tabbar glass">
+ <button class="on" onclick="tab('home',this)">🦆</button>
+ <button onclick="tab('shop',this)">🛍</button>
+ <button onclick="tab('top',this)">🏆</button>
+</div>
+
+<script>
+const tg=Telegram.WebApp;tg.ready();tg.expand();tg.disableVerticalSwipes?.();
+tg.setHeaderColor?.("#0a0f2c");tg.setBackgroundColor?.("#0a0f2c");
+const $=id=>document.getElementById(id),hap=t=>tg.HapticFeedback?.impactOccurred(t||"light");
+let S;
+const api=(p,b={})=>fetch("/api/"+p,{method:"POST",headers:{"content-type":"application/json"},
+ body:JSON.stringify({initData:tg.initData,...b})}).then(r=>r.json());
+const toast=t=>{$("toast").textContent=t;$("toast").classList.add("s");setTimeout(()=>$("toast").classList.remove("s"),1800)};
+
+function render(){
+ $("lvl").textContent=`🔥 ${S.streak}  ·  Ур. ${Math.floor(Math.sqrt(S.xp/10))+1}`;
+ $("bars").innerHTML=[["🍞 Сытость",S.hunger],["💛 Настроение",S.mood],["⚡ Энергия",S.energy]]
+  .map(([n,v])=>`<div class="bar">${n}<div><b style="width:${v}%"></b></div></div>`).join("");
+ $("stage").classList.toggle("sleep",!!S.sleeping);
+ $("accs").innerHTML=(S.items.includes("crown")?'<path d="M72 36l10-22 18 16 18-16 10 22z" fill="#ffd54a" stroke="#c99700" stroke-width="3"/>':"")+
+  (S.items.includes("shades")?'<rect x="76" y="54" width="46" height="18" rx="8" fill="#111"/>':"");
+ $("items").innerHTML=Object.entries(S.shop).map(([k,v])=>
+  `<button class="buy glass" onclick="buy('${k}')"><b>${v.title}</b><small>${v.desc}</small>⭐ ${v.stars}</button>`).join("");
+}
+async function act(a){hap("medium");S=await api("act",{action:a});render();if(a!="sleep")jump();}
+function jump(){const d=$("duck");d.classList.remove("jump");void d.offsetWidth;d.classList.add("jump")}
+$("duck").onclick=()=>{hap();jump();act("play")};
+async function buy(sku){let to;
+ if(sku=="gift"){to=prompt("Telegram ID друга (пусто — себе)")||undefined}
+ const {link}=await api("invoice",{sku,to});
+ tg.openInvoice(link,st=>{if(st=="paid"){hap("heavy");toast("Куплено! 🎉");setTimeout(async()=>{S=await api("state");render()},1500)}})}
+function share(){tg.openTelegramLink("https://t.me/share/url?url="+encodeURIComponent(location.origin)+"&text="+encodeURIComponent("Моя утка скучает 🦆"))}
+function tab(p,b){document.querySelectorAll(".page").forEach(e=>e.classList.remove("on"));$(p).classList.add("on");
+ document.querySelectorAll(".tabbar button").forEach(e=>e.classList.remove("on"));b.classList.add("on");hap();
+ if(p=="top")api("top").then(r=>$("lb").innerHTML=r.map((u,i)=>`<div class="lb glass"><span>${i+1}. ${u.name}</span><b>${u.xp} XP</b></div>`).join(""))}
+
+addEventListener("pointermove",e=>{const r=$("duck").getBoundingClientRect();
+ const dx=(e.clientX-r.x-r.width/2)/r.width,dy=(e.clientY-r.y-r.height/2)/r.height;
+ $("eye").setAttribute("transform",`translate(${dx*6},${dy*6})`)});
+
+const ui=new TON_CONNECT_UI.TonConnectUI({manifestUrl:location.origin+"/tonconnect-manifest.json",buttonRootId:"ton"});
+async function loadGifts(addr){
+ const r=await fetch(`https://tonapi.io/v2/accounts/${addr}/nfts?limit=50&indirect_ownership=false`).then(r=>r.json());
+ const g=(r.nft_items||[]).filter(n=>/gift|t\.me\/nft/i.test(JSON.stringify(n.metadata||{})+(n.collection?.name||"")));
+ $("gifts").innerHTML=g.length?g.map(n=>`<div class="gift glass" onclick="giftPlay(this)"><img src="${n.previews?.[1]?.url||n.metadata.image}"><br>${(n.metadata.name||"").slice(0,16)}</div>`).join("")
+  :'<div class="gift glass">Подарков нет</div>';
+}
+function giftPlay(el){const r=el.getBoundingClientRect(),s=$("stage").getBoundingClientRect();
+ const d=$("duck");d.style.transform=`translateX(${(r.x+r.width/2)-(s.x+s.width/2)}px)`;hap("medium");
+ setTimeout(()=>{jump();act("gift");toast("Утка в восторге! +15 XP");d.style.transform=""},900)}
+ui.onStatusChange(w=>{if(w)loadGifts(w.account.address)});
+
+(async()=>{S=await api("state");render();if(S.bonus)toast(`Серия ${S.streak} дней! 🔥`)})();
+</script></body></html>
